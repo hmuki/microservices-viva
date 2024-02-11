@@ -25,8 +25,13 @@ func main() {
 		os.Exit(1)
 	}
 	defer rabbitConn.Close()
+	log.Println("Connected to RabbitMQ!")
 
-	app := Config{}
+	app := Config{
+		Rabbit: rabbitConn,
+	}
+
+	log.Printf("Starting broker service on port %s\n", webPort)
 
 	// define http server
 	srv := &http.Server{
