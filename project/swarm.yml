@@ -1,0 +1,113 @@
+version: '3'
+
+volumes:
+  pg-data:
+  db-data:
+  caddy_data:
+    external: true
+  caddy_config:
+
+services:
+
+  caddy:
+    image: hoffmann4muki/micro-caddy:1.0.0
+    deploy:
+      mode: replicated
+      replicas: 1
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+
+  front-end:
+    image: hoffmann4muki/front-end:1.0.3
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+      BROKER_URL: "http://backend"
+
+  broker-service:
+    image: hoffmann4muki/broker-service:1.0.1
+    deploy:
+      mode: replicated
+      replicas: 1
+  
+  logger-service:
+    image: hoffmann4muki/logger-service:1.0.0
+    deploy:
+      mode: replicated
+      replicas: 1
+  
+  listener-service:
+    image: hoffmann4muki/listener-service:1.0.0
+    deploy:
+      mode: replicated
+      replicas: 1
+  
+  authentication-service:
+    image: hoffmann4muki/authentication-service:1.0.0
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+      DSN: "host=postgres port=5432 user=postgres password=password dbname=users sslmode=disable timezone=UTC connect_timeout=5"
+  
+  mail-service:
+    image: hoffmann4muki/mail-service:1.0.0
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+      MAIL_DOMAIN: localhost
+      MAIL_HOST: mailhog
+      MAIL_PORT: 1025
+      MAIL_ENCRYPTION: none
+      MAIL_USERNAME: ""
+      MAIL_PASSWORD: ""
+      FROM_NAME: "John Smith"
+      FROM_ADDRESS: john.smith@example.com
+
+  rabbitmq:
+    image: 'rabbitmq:3.9-alpine'
+    deploy:
+      mode: global
+  
+  mailhog:
+    image: 'mailhog/mailhog:latest'
+    ports:
+      - "8025:8025"
+    deploy:
+      mode: global
+  
+  mongo:
+    image: 'mongo:4.2.16-bionic'
+    ports:
+      - "27017:27017"
+    deploy:
+      mode: global
+    environment:
+      MONGO_INITDB_DATABASE: logs
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+      DB-DATA: /db-data
+    volumes:
+      - db-data:/db-data
+  
+  postgres:
+    image: 'postgres:14.2'
+    ports:
+      - "5432:5432"
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: users
+      PGDATA: /pg-data
+    volumes:
+      - pg-data:/pg-data
+    

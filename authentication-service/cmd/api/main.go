@@ -19,23 +19,22 @@ const webPort = "80"
 var counts int64
 
 type Config struct {
-	DB     *sql.DB
-	Models data.Models
+	Repo   data.Repository
+	Client *http.Client
 }
 
 func main() {
 	log.Println("Starting authentication service")
 
 	// connect to DB
-	conn := connectToBD()
+	conn := connectToDB()
 	if conn == nil {
 		log.Panic("Can't connect to Postgres!")
 	}
 
 	// set up config
 	app := Config{
-		DB:     conn,
-		Models: data.New(conn),
+		Client: &http.Client{},
 	}
 
 	srv := &http.Server{
@@ -63,7 +62,7 @@ func openDB(dsn string) (*sql.DB, error) {
 	return db, nil
 }
 
-func connectToBD() *sql.DB {
+func connectToDB() *sql.DB {
 	dsn := os.Getenv("DSN")
 
 	for {
@@ -85,4 +84,9 @@ func connectToBD() *sql.DB {
 		time.Sleep(2 * time.Second)
 		continue
 	}
+}
+
+func (app *Config) setupRepo(conn *sql.DB) {
+	db := data.NewPostgresRepository(conn)
+	app.Repo = db
 }
