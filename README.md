@@ -2,4 +2,4 @@
 
 Working with microservices in Golang using REST, RPC, gPRC and message queues
 
-![System_Architecture](system_architecture.png)
+![System_Architecture](architecture.png)
