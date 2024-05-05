@@ -1,0 +1,22 @@
+version: '2'
+
+volumes:
+  pg-data:
+
+services:
+
+  postgres:
+    image: 'postgres:14.2'
+    ports:
+      - "5432:5432"
+    restart: always
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: users
+      PGDATA: /pg-data
+    volumes:
+      - pg-data:/pg-data
