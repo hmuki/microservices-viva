@@ -142,7 +142,7 @@
                 output.innerHTML += `<br><strong>Response from broker service</strong>: ${data.message}`;
             }
         }).catch(error => {
-            console.log("error", error);
+            output.innerHTML += "<br><br>Error: " + error;
         })
      })
 
